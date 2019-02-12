@@ -39,9 +39,9 @@ namespace VoucherService.MQ
             {
                 var body = ea.Body;
                 var message = Encoding.UTF8.GetString(body);
-                var deserialized = JsonConvert.DeserializeObject<Discount>(message);
+                var deserialized = JsonConvert.DeserializeObject<Gift>(message);
                 _logger.LogDebug("Received Discount Object:", deserialized.ToString());
-                baseVoucherService.UpdateRedemptionCount(deserialized.Code);
+                baseVoucherService.UpdateGiftVoucherAmount(deserialized.Code, deserialized.GiftBalance);
                 _logger.LogDebug("Successful Update of Discount voucher:", deserialized.Code);
             };
 
@@ -57,7 +57,7 @@ namespace VoucherService.MQ
                 var message = Encoding.UTF8.GetString(body);
                 var deserialized = JsonConvert.DeserializeObject<Gift>(message);
                 _logger.LogDebug("Received Gift Object{0} {1}", deserialized.Code, deserialized.GiftBalance);
-                baseVoucherService.UpdateGiftVoucherBalance(deserialized.Code, deserialized.GiftBalance);
+                baseVoucherService.UpdateGiftVoucherAmount(deserialized.Code, deserialized.GiftBalance);
                 _logger.LogDebug("Successful Update of GiftVoucher amount for voucher {0}", deserialized.Code);
             };
             channel.BasicConsume(queue: "gift-two",

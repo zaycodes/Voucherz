@@ -41,7 +41,7 @@ namespace VoucherServiceBL.Service
 
         public async Task<int?> CreateVoucher(VoucherRequest voucherRequest)
         {
-            var numOfVouchersCreated = 0;
+            var numOfVouchersCreated = voucherRequest.NumbersOfVoucherToCreate;
 
             //let each voucher service handle its own creation
             try
@@ -52,17 +52,17 @@ namespace VoucherServiceBL.Service
 
                 if (voucherRequest.VoucherType.ToUpper() == "GIFT")
                 {
-                    numOfVouchersCreated += await _giftVoucherService.CreateGiftVoucher(voucherRequest);
+                     Task.Run(() => _giftVoucherService.CreateGiftVoucher(voucherRequest));
                 }
 
                 else if (voucherRequest.VoucherType.ToUpper() == "DISCOUNT")
                 {
-                    numOfVouchersCreated += await _discountVoucherService.CreateDiscountVoucher(voucherRequest);
+                     Task.Run(() => _discountVoucherService.CreateDiscountVoucher(voucherRequest));
                 }
 
                 else
                 {
-                    numOfVouchersCreated += await _valueVoucherService.CreateValueVoucher(voucherRequest);
+                     Task.Run(() => _valueVoucherService.CreateValueVoucher(voucherRequest));
 
                 }
 
@@ -177,13 +177,13 @@ namespace VoucherServiceBL.Service
                 //get the voucher that is to be updated
                 string encryptedCode = CodeGenerator.Encrypt(code);
                 var voucher = await GetVoucherByCode(encryptedCode);
-                voucher.VoucherStatus = voucher.VoucherStatus== "ACTIVE" ? "INACTIVE" : "ACTIVE";
+                voucher.VoucherStatus = voucher.VoucherStatus.ToUpper() == "ACTIVE" ? "INACTIVE" : "ACTIVE";
 
 
                 long recordsAffected = await _baseRepository.UpdateVoucherStatusByCodeAsync(voucher);
 
                 //log the event
-                if (voucher.VoucherStatus == "ACTIVE")
+                if (voucher.VoucherStatus.ToUpper() == "ACTIVE")
                 {
                     var updatedEvent = new VoucherDeactivatedEvent() {
                             EventId = Guid.NewGuid(), EventTime = DateTime.Now, MerchantId = voucher.MerchantId,
@@ -193,7 +193,7 @@ namespace VoucherServiceBL.Service
                     _logger.LogInformation("Deactivated a voucher: {@Event}", updatedEvent);    
                 }
 
-                if (voucher.VoucherStatus == "INACTIVE")
+                if (voucher.VoucherStatus.ToUpper() == "INACTIVE")
                 {
                     var updatedEvent = new VoucherReactivatedEvent() {
                             EventId = Guid.NewGuid(), EventTime = DateTime.Now, MerchantId = voucher.MerchantId,
@@ -433,7 +433,6 @@ namespace VoucherServiceBL.Service
 
         public async Task UpdateRedemptionCount(string code)
         {
-            
             var discount = await GetDiscountVoucher(code);
             await _discountVoucherService.UpdateRedemptionCount(discount);
         }
