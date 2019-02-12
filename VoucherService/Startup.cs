@@ -86,24 +86,20 @@ namespace VoucherService
                 options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
             .AddCookie("Cookies")
-            .AddOpenIdConnect(options =>
+            .AddJwtBearer(options =>
             {
                 // URL of the Keycloak server
                 options.Authority = "http://localhost:8080/auth/realms/Voucherz";
-                // Client configured in the Keycloak
-                options.ClientId = "voucher";
-
-                // For testing we disable https (should be true for production)
+                options.Audience = "account";
                 options.RequireHttpsMetadata = false;
-                options.SaveTokens = true;
-
-                // Client secret shared with Keycloak
-                options.ClientSecret = "040519ee-bd56-4ec6-8d98-cc3f900f736b";
-                options.GetClaimsFromUserInfoEndpoint = true;
-
-                // OpenID flow to use
-                options.ResponseType = OpenIdConnectResponseType.CodeIdToken;
             });
+
+            services.AddAuthorization(options => {
+                options.AddPolicy("Admin", policyBuilder => {
+                    policyBuilder.RequireClaim("isAdmin");
+                });
+            });
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
