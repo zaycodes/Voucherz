@@ -19,6 +19,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Serilog;
 using RabbitMQ.Client;
 using VoucherService.MQ;
+using VoucherServiceBL.HangFire;
 using VoucherServiceBL.Repository;
 using VoucherServiceBL.Repository.Mongo;
 using VoucherServiceBL.Repository.SqlServer;
@@ -109,8 +110,6 @@ namespace VoucherService
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-          
-
             app.UseCors("MyPolicy");
             // Add this line to ensure authentication is enabled
             app.UseAuthentication();
@@ -123,15 +122,14 @@ namespace VoucherService
             {
                 app.UseHsts();
             }
-            
+
             //logging
             loggerFactory.AddSerilog();
             app.UseHttpsRedirection();
             app.UseMvc();
-
+            
             app.UseHangfireServer();
             app.UseHangfireDashboard();
-
         }
     }
 }

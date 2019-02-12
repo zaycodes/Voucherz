@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Hangfire;
@@ -61,16 +62,28 @@ namespace VoucherServiceBL.Repository.Mongo
             var res = await voucherCursor.FirstOrDefaultAsync();
             return res;
         }
-        
+
+        //public async Task<Gift> GetGiftVoucherAsync(Voucher voucher)
+        //{
+        //    var filter = Builders<Voucher>.Filter.Where(v =>
+        //                                   v.Code == voucher.Code && v.MerchantId == voucher.MerchantId &&
+        //                                   v.VoucherType == voucher.VoucherType);
+        //    var voucherCursor = await _vouchers.FindAsync<Gift>(filter);
+        //    return await voucherCursor.FirstOrDefaultAsync();
+        //}
         public async Task<int> UpdateRedemptionCount(Discount discount)
         {
-
-            var filter = Builders<Voucher>.Filter.Eq("code", discount.Code);
-            var updateDef = Builders<Voucher>.Update.Set("redemption_count", discount.RedemptionCount += 1);
-
+            string encryptedCode = CodeGenerator.Encrypt(discount.Code);
+            var filter = Builders<Voucher>.Filter.Eq("code", encryptedCode);
+            discount.RedemptionCount = discount.RedemptionCount + 1;
+            var updateDef = Builders<Voucher>.Update.Set("redemption_count", discount.RedemptionCount);
             var cursor = await _vouchers.UpdateOneAsync(filter, updateDef);
-
             return (int)cursor.ModifiedCount;
+        }
+
+        private Exception Exception(string v)
+        {
+            throw new NotImplementedException();
         }
     }
 }

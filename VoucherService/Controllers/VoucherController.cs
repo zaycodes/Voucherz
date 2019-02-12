@@ -77,7 +77,7 @@ namespace VoucherService.Controllers
         public async Task<ActionResult<Discount>> GetDiscountVoucher([FromRoute] string code)
         {
             var discount = await baseVoucherService.GetDiscountVoucher(code);
-            if (discount == null) return NotFound(new { message = $"invalid voucher" });
+            if (discount == null) return NotFound();
             return discount;
         }
 
