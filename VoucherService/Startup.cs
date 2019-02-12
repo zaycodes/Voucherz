@@ -72,6 +72,8 @@ namespace VoucherService
             services.AddTransient<IGiftRepository, MongoGiftRepository>();
             services.AddTransient<IDiscountRepository, MongoDiscountRepository>();
             services.AddTransient<IValueRepository, MongoValueRepository>();
+            services.AddTransient<IAdminRepo, MongoAdminRepository>();
+            services.AddTransient<IAdminService, AdminService>();            
             
             services.AddMongo(Configuration);
 
